@@ -1,7 +1,6 @@
 package skip_list
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -14,14 +13,12 @@ const (
 type Comparer interface {
 	Less(v1, v2 interface{}) bool
 	Equal(v1, v2 interface{}) bool
-	Min() interface{}
 }
 
 type node struct {
 	value    interface{}
-	level    int
 	forwards []*node
-	drawed   bool
+	// drawed   bool
 }
 
 type skipList struct {
@@ -32,27 +29,26 @@ type skipList struct {
 
 func NewNode(v interface{}, level int) *node {
 	n := new(node)
-	n.level = level
 	n.value = v
 	n.forwards = make([]*node, level)
 	for i := 0; i < level; i++ {
 		n.forwards[i] = nil
 	}
-	n.drawed = false
+	// n.drawed = false
 	return n
 }
 
-func (n *node) DrawMysel() {
-	if !n.drawed {
-		for i := 0; i < n.level; i++ {
-			println("|")
-			println("|")
-			print("---")
-			println("|")
-			println("|")
-		}
-	}
-}
+//func (n *node) DrawMysel() {
+//	if !n.drawed {
+//		for i := 0; i < n.level; i++ {
+//			println("|")
+//			println("|")
+//			print("---")
+//			println("|")
+//			println("|")
+//		}
+//	}
+//}
 
 func (n *node) LinkOther(other *node, level int, distance int) {
 
@@ -60,9 +56,8 @@ func (n *node) LinkOther(other *node, level int, distance int) {
 
 func NewSkipList(c Comparer) *skipList {
 	s := new(skipList)
-	// s.level = maxLevel
 	s.level = 0
-	s.head = NewNode(c.Min(), maxLevel)
+	s.head = NewNode(0, maxLevel)
 	s.comparer = c
 	return s
 }
@@ -104,7 +99,6 @@ func (s *skipList) Find(key interface{}) *node {
 }
 
 func (s *skipList) Insert(key interface{}) {
-
 	update := make([]*node, maxLevel)
 	x := s.head
 	for i := maxLevel - 1; i >= 0; i-- {
@@ -125,7 +119,7 @@ func (s *skipList) Insert(key interface{}) {
 	}
 
 	level := genRandomLevel()
-	fmt.Printf("new level: %d\n", level)
+	// fmt.Printf("new level: %d\n", level)
 	n := NewNode(key, level)
 	if level > s.level {
 		//for i := s.level; i < level; i++ {
@@ -175,7 +169,7 @@ func (s *skipList) Delete(key interface{}) {
 			break
 		}
 	}
-	fmt.Printf("skip list level now is: %d\n", s.level)
+	// fmt.Printf("skip list level now is: %d\n", s.level)
 }
 
 func genRandomLevel() int {

@@ -15,10 +15,6 @@ func (ic IntComparer) Equal(key1, key2 interface{}) bool {
 	return key1.(int) == key2.(int)
 }
 
-func (ic IntComparer) Min() interface{} {
-	return 0
-}
-
 func TestSkipList(t *testing.T) {
 	skipList := NewSkipList(&IntComparer{})
 	skipList.Insert(1)
