@@ -1,7 +1,6 @@
 package skip_list
 
 import (
-	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -63,13 +62,8 @@ func NewSkipList(c Comparer) *skipList {
 	s.level = 0
 	s.head = NewNode(0, maxLevel)
 	s.comparer = c
-	start := time.Now()
 	source := rand.NewSource(time.Now().UnixNano())
-	fmt.Printf("new source cost: %d ns\n", time.Since(start).Nanoseconds())
-	start = time.Now()
-	// s.rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	s.rand = rand.New(source)
-	fmt.Printf("new rand cost: %d ns\n", time.Since(start).Nanoseconds())
 	return s
 }
 
