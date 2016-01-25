@@ -1,13 +1,15 @@
 package skip_list
 
 import (
+	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 )
 
 const (
 	maxLevel = 12
-	p        = 0.5
+	p        = 0.25
 )
 
 type Comparer interface {
@@ -22,9 +24,11 @@ type node struct {
 }
 
 type skipList struct {
+	sync.RWMutex
 	head     *node
 	level    int
 	comparer Comparer
+	rand     *rand.Rand
 }
 
 func NewNode(v interface{}, level int) *node {
@@ -59,6 +63,13 @@ func NewSkipList(c Comparer) *skipList {
 	s.level = 0
 	s.head = NewNode(0, maxLevel)
 	s.comparer = c
+	start := time.Now()
+	source := rand.NewSource(time.Now().UnixNano())
+	fmt.Printf("new source cost: %d ns\n", time.Since(start).Nanoseconds())
+	start = time.Now()
+	// s.rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	s.rand = rand.New(source)
+	fmt.Printf("new rand cost: %d ns\n", time.Since(start).Nanoseconds())
 	return s
 }
 
@@ -82,6 +93,9 @@ func NewSkipList(c Comparer) *skipList {
 //}
 
 func (s *skipList) Find(key interface{}) *node {
+	s.RLock()
+	defer s.RUnlock()
+
 	x := s.head
 	for i := s.level - 1; i >= 0; i-- {
 		for {
@@ -99,6 +113,9 @@ func (s *skipList) Find(key interface{}) *node {
 }
 
 func (s *skipList) Insert(key interface{}) {
+	s.Lock()
+	defer s.Unlock()
+
 	update := make([]*node, maxLevel)
 	x := s.head
 	for i := maxLevel - 1; i >= 0; i-- {
@@ -110,7 +127,6 @@ func (s *skipList) Insert(key interface{}) {
 			}
 		}
 		update[i] = x
-		// fmt.Printf("update[%d]: %v\n", i, x)
 	}
 
 	if x.forwards[0] != nil && s.comparer.Equal(key, x.forwards[0].value) {
@@ -118,8 +134,7 @@ func (s *skipList) Insert(key interface{}) {
 		return
 	}
 
-	level := genRandomLevel()
-	// fmt.Printf("new level: %d\n", level)
+	level := s.genRandomLevel()
 	n := NewNode(key, level)
 	if level > s.level {
 		//for i := s.level; i < level; i++ {
@@ -136,6 +151,9 @@ func (s *skipList) Insert(key interface{}) {
 }
 
 func (s *skipList) Delete(key interface{}) {
+	s.Lock()
+	defer s.Unlock()
+
 	update := make([]*node, maxLevel)
 	x := s.head
 	for i := s.level - 1; i >= 0; i-- {
@@ -169,14 +187,12 @@ func (s *skipList) Delete(key interface{}) {
 			break
 		}
 	}
-	// fmt.Printf("skip list level now is: %d\n", s.level)
 }
 
-func genRandomLevel() int {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+func (s *skipList) genRandomLevel() int {
 	i := 1
-	for ; i <= maxLevel; i++ {
-		if r.Float32() >= float32(p) {
+	for ; i < maxLevel; i++ {
+		if s.rand.Float32() >= float32(p) {
 			break
 		}
 	}
