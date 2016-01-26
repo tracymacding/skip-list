@@ -45,7 +45,7 @@ func SingleThreadInsert(args []interface{}) {
 		s.Insert(i)
 	}
 	cost := time.Since(start)
-	fmt.Printf("Thread %d insert records [%d - %d] cost %f s\n", threadID, keyFrom, keyTo, cost.Seconds())
+	fmt.Printf("Thread %d insert records [%d - %d] cost %f s, tps: %f\n", threadID, keyFrom, keyTo, cost.Seconds(), float64((keyTo-keyFrom))/cost.Seconds())
 }
 
 func SingleThreadGet(args []interface{}) {
@@ -76,11 +76,11 @@ func TestSkipListRWPerformance(t *testing.T) {
 	SingleThreadInsert([]interface{}{skipList, 0, 1000000, 0})
 
 	wg := new(WaitGroupWrapper)
-	for i := 0; i < 5; i++ {
-		wg.Wrap(SingleThreadInsert, skipList, (i+1)*200000, (i+5)*200000, i)
+	for i := 0; i < 10; i++ {
+		wg.Wrap(SingleThreadInsert, skipList, i*1000000, (i+1)*1000000, i)
 	}
-	for i := 0; i < 20; i++ {
-		wg.Wrap(SingleThreadGet, skipList, (i)*50000, (i+1)*50000, i)
+	for i := 0; i < 0; i++ {
+		wg.Wrap(SingleThreadGet, skipList, (i)*100000, (i+1)*100000, i)
 	}
 	wg.Wait()
 }

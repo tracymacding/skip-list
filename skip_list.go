@@ -20,8 +20,7 @@ type Comparer interface {
 }
 
 type node struct {
-	value interface{}
-	// forwards []*node
+	value    interface{}
 	forwards []unsafe.Pointer
 }
 
@@ -36,7 +35,6 @@ type skipList struct {
 func NewNode(v interface{}, level int) *node {
 	n := new(node)
 	n.value = v
-	// n.forwards = make([]*node, level)
 	n.forwards = make([]unsafe.Pointer, level)
 	for i := 0; i < level; i++ {
 		n.forwards[i] = nil
@@ -46,11 +44,9 @@ func NewNode(v interface{}, level int) *node {
 
 func (n *node) SetNext(level int, n1 *node) {
 	atomic.StorePointer(&(n.forwards[level]), unsafe.Pointer(n1))
-	// n.forwards[level] = n1
 }
 
 func (n *node) Next(level int) *node {
-	// return n.forwards[level]
 	return (*node)(atomic.LoadPointer(&n.forwards[level]))
 }
 
@@ -100,24 +96,8 @@ func (s *skipList) findGreaterOrEqual(key interface{}, prev []*node) *node {
 }
 
 func (s *skipList) Find(key interface{}) *node {
-	//s.RLock()
-	//defer s.RUnlock()
-
-	//x := s.head
-	//for i := s.level - 1; i >= 0; i-- {
-	//	for {
-	//		if x.forwards[i] != nil && s.comparer.Less(x.forwards[i].value, key) {
-	//			x = x.forwards[i]
-	//		} else {
-	//			break
-	//		}
-	//	}
-	//}
 
 	n := s.findGreaterOrEqual(key, nil)
-	//if s.comparer.Equal(key, x.forwards[0].value) {
-	//	return x.forwards[0]
-	//}
 	if s.comparer.Equal(key, n.value) {
 		return n
 	}
@@ -128,25 +108,9 @@ func (s *skipList) Insert(key interface{}) {
 	s.Lock()
 	defer s.Unlock()
 
-	//update := make([]*node, maxLevel)
-	//x := s.head
-	//for i := maxLevel - 1; i >= 0; i-- {
-	//	for {
-	//		if x.forwards[i] != nil && s.comparer.Less(x.forwards[i].value, key) {
-	//			x = x.forwards[i]
-	//		} else {
-	//			break
-	//		}
-	//	}
-	//	update[i] = x
-	//}
 	prev := make([]*node, maxLevel)
 	n := s.findGreaterOrEqual(key, prev)
 
-	//if x.forwards[0] != nil && s.comparer.Equal(key, x.forwards[0].value) {
-	//	x.forwards[0].value = key
-	//	return
-	//}
 	if n != nil && s.comparer.Equal(key, n.value) {
 		n.value = key
 		return
@@ -172,22 +136,6 @@ func (s *skipList) Delete(key interface{}) {
 	s.Lock()
 	defer s.Unlock()
 
-	//update := make([]*node, maxLevel)
-	//x := s.head
-	//for i := s.level - 1; i >= 0; i-- {
-	//	for {
-	//		if x.forwards[i] != nil && s.comparer.Less(x.forwards[i].value, key) {
-	//			x = x.forwards[i]
-	//		} else {
-	//			break
-	//		}
-	//	}
-	//	update[i] = x
-	//}
-	//if x.forwards[0] != nil && !s.comparer.Equal(x.forwards[0].value, key) {
-	//	return
-	//}
-	//n := x.forwards[0]
 	prev := make([]*node, maxLevel)
 	n := s.findGreaterOrEqual(key, prev)
 	if !s.comparer.Equal(n.value, key) {
@@ -199,9 +147,6 @@ func (s *skipList) Delete(key interface{}) {
 		if prev[i] != nil && prev[i].Next(i) != nil && s.comparer.Equal(key, prev[i].Next(i).value) {
 			prev[i].SetNext(i, n.Next(i))
 		}
-		//if update[i].forwards[i] != nil && s.comparer.Equal(key, update[i].forwards[i].value) {
-		//	update[i].forwards[i] = n.forwards[i]
-		//}
 	}
 	for {
 		if s.level > 0 && s.head.Next(s.level-1) == nil {
