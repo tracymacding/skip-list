@@ -100,7 +100,7 @@ func (s *skipList) Find(key interface{}) *node {
 			}
 		}
 	}
-	if s.comparer.Equal(key, x.forwards[0].value) {
+	if x.forwards[0] != nil && s.comparer.Equal(key, x.forwards[0].value) {
 		return x.forwards[0]
 	}
 	return nil
