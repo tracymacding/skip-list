@@ -98,7 +98,7 @@ func (s *skipList) findGreaterOrEqual(key interface{}, prev []*node) *node {
 func (s *skipList) Find(key interface{}) *node {
 
 	n := s.findGreaterOrEqual(key, nil)
-	if s.comparer.Equal(key, n.value) {
+	if n != nil && s.comparer.Equal(key, n.value) {
 		return n
 	}
 	return nil
@@ -138,7 +138,7 @@ func (s *skipList) Delete(key interface{}) {
 
 	prev := make([]*node, maxLevel)
 	n := s.findGreaterOrEqual(key, prev)
-	if !s.comparer.Equal(n.value, key) {
+	if n != nil && !s.comparer.Equal(n.value, key) {
 		return
 	}
 
