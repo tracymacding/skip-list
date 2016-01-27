@@ -179,15 +179,15 @@ func TestCorrectness(t *testing.T) {
 
 	wg := new(WaitGroupWrapper)
 	r := newRecords()
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 10; i++ {
 		wg.Wrap(GetAndCheck, r, skipList)
 	}
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 10; i++ {
 		wg.Wrap(DeleteRecord, r, skipList)
 	}
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 10; i++ {
 		wg.Wrap(PutRecord, r, skipList)
 	}
 	// wg.Wait()
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 100)
 }
